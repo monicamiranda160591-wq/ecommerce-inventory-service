@@ -1,0 +1,44 @@
+spring:
+  application:
+    name: inventory-service
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:ecommerce_inventory}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:postgres}
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  messages:
+    basename: ValidationMessages
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    consumer:
+      group-id: inventory-service
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.type.mapping: orderPlacedEvent:com.monicamiranda.inventoryservice.kafka.event.OrderPlacedEvent
+        spring.json.trusted.packages: com.monicamiranda.*
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.type.mapping:
+          orderConfirmedEvent:com.monicamiranda.inventoryservice.kafka.event.OrderConfirmedEvent,
+          orderCancelledEvent:com.monicamiranda.inventoryservice.kafka.event.OrderCancelledEvent,
+          orderPlacedEvent:com.monicamiranda.inventoryservice.kafka.event.OrderPlacedEvent
+
+server:
+  port: ${SERVER_PORT:8082}
+
+logging:
+  level:
+    dev.alefiengo.inventoryservice: DEBUG
+    org.springframework.web: INFO
+
